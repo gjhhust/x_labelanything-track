@@ -1,0 +1,10 @@
+move_car
+static_car
+move_people
+static_people
+move_bicycle
+static_bicycle
+static_peoplebicycle
+bicycleCrowd
+peopleCrowd
+ignore

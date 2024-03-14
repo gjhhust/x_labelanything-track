@@ -1,0 +1,10 @@
+An unhandled exception occurred:
+
+ZeroDivisionError: division by zero
+
+Traceback (most recent call last):
+  File "H:\UAVTOD_dataset\RGB\X-AnyLabeling\.\anylabeling\views\labeling\label_widget.py", line 4245, in tracks_management
+    result = self.tracks_management_Dialog.exec_(len(self.image_list), self.track_dicts, self.get_tracks)
+  File "H:\UAVTOD_dataset\RGB\X-AnyLabeling\.\anylabeling\views\labeling\widgets\tracks_management_dialog.py", line 93, in exec_
+    result = 1/0
+ZeroDivisionError: division by zero
