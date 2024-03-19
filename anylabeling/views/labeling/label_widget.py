@@ -2628,8 +2628,8 @@ class LabelingWidget(LabelDialog):
                 )
         return crop_image_path
     
-    # 向track_dock添加新的踪迹，并且生成crop_image
-    def add_shape_to_track_list(self, shape, range, image_data): # row新添加的track条目位置
+    # 将shape points顺序调整成一致的
+    def fix_shape_bbox(self, shape):
         bbox = [shape.points[0].x(), shape.points[0].y(), shape.points[2].x(), shape.points[2].y()]
         if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
             self.error_message(
@@ -2648,7 +2648,11 @@ class LabelingWidget(LabelDialog):
                 shape.points[3].setY(bbox[1])
             bbox = [shape.points[0].x(), shape.points[0].y(), shape.points[2].x(), shape.points[2].y()]
             self.canvas.select_shapes([shape])
+        return bbox
 
+    # 向track_dock添加新的踪迹，并且生成crop_image
+    def add_shape_to_track_list(self, shape, range, image_data): # row新添加的track条目位置
+        bbox = self.fix_shape_bbox(shape)
             
         crop_image_path = os.path.join(self.video_target_dir_path,"values","crop_image",f"{shape.label}_{shape.group_id}.png")
         self.crop_image_from_shape(bbox, 
@@ -2804,10 +2808,6 @@ class LabelingWidget(LabelDialog):
             last_label = self.find_last_label()
             if self._config["auto_use_last_label"] and last_label:
                 text = last_label
-            elif self.selected_track_id and self.track_mode:
-                text = self.track_dicts[self.selected_track_id].label
-                group_id = self.track_dicts[self.selected_track_id].group_id
-                track_create = True
             else:
                 previous_text = self.label_dialog.edit.text()
                 (
@@ -5160,10 +5160,6 @@ class LabelingWidget(LabelDialog):
             return
         if len(self._copied_shapes) == 0:
             return
-        
-        self.canvas.paste_track_mode = 1 # 进入tracks整体跟随鼠标浮动状态
-        # 记录当前鼠标位置
-        self.canvas.paste_tracks_recordmousePos()
 
         if len(self.homoMatrixes)==0:
             dir_name = osp.dirname(next(iter(self.image_list_dict.values())))
@@ -5175,6 +5171,12 @@ class LabelingWidget(LabelDialog):
         matrix = self.homoMatrixes[self.frame_number][self.copy_frame_number]
         shape_bboxes = [[shape.points[0].x(),shape.points[0].y(),shape.points[2].x(),shape.points[2].y()]  for shape in self._copied_shapes]
         transformed_shape_bboxes = apply_bboxes_xyxy(shape_bboxes, matrix)
+
+        self._copied_shapes = None
+
+        self.canvas.paste_track_mode = 1 # 进入tracks整体跟随鼠标浮动状态
+        # 记录当前鼠标位置
+        self.canvas.paste_tracks_recordmousePos()
 
         def get_closest_keys(track_anns, cur_frame_number):
             keys = sorted(track_anns.keys())
@@ -5307,6 +5309,10 @@ class LabelingWidget(LabelDialog):
             if not os.path.exists(self.trackes_file):
                 return
             
+            # 删除crop_image
+            if not os.path.exists(self.unique_track_list_info[track_id]["crop_image_path"]):
+                os.remove(self.unique_track_list_info[track_id]["crop_image_path"])
+
             non_repetitive_lines = []
             with open(self.trackes_file, "r", encoding="utf-8") as f:
                 for line in f:
@@ -5322,6 +5328,8 @@ class LabelingWidget(LabelDialog):
             # 移除dock条目
             self.unique_track_list_info.pop(self.selected_track_id, None)
             self.unique_track_list.takeItem(current_row)
+
+            self.selected_track_id = None
             
 
     def handle_end_track(self, _ , selected_track_id=None, paste_track=False):

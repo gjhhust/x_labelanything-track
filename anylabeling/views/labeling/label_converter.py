@@ -323,6 +323,8 @@ class LabelConverter:
             for cat in data["categories"]:
                 self.classes.append(cat["name"])
 
+        video_name = osp.basename(image_path)
+
         total_info, label_info = {}, {}
 
         # map category_id to name
@@ -331,6 +333,10 @@ class LabelConverter:
 
         # map image_id to info
         for dic_info in data["images"]:
+            # TODO: 仅仅加载本视频的注释
+            if video_name != osp.dirname(dic_info["file_name"]):
+                continue
+            
             total_info[dic_info["id"]] = {
                 "imageWidth": dic_info["width"],
                 "imageHeight": dic_info["height"],
@@ -339,6 +345,10 @@ class LabelConverter:
             }
 
         for dic_info in data["annotations"]:
+            # TODO: 仅仅加载本视频的注释
+            if dic_info["image_id"] not in total_info:
+                continue
+
             bbox = dic_info["bbox"]
             xmin = bbox[0]
             ymin = bbox[1]

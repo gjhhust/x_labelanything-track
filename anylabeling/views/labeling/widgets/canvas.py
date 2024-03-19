@@ -1536,6 +1536,24 @@ class Canvas(
         w, h = self.pixmap.width(), self.pixmap.height()
         return not (0 <= p.x() <= w - 1 and 0 <= p.y() <= h - 1)
 
+    # 将shape points顺序调整成一致的
+    def fix_shape_bbox(self, shape):
+        bbox = [shape.points[0].x(), shape.points[0].y(), shape.points[2].x(), shape.points[2].y()]
+        if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
+            if bbox[2] <= bbox[0]:
+                shape.points[0].setX(bbox[2])
+                shape.points[3].setX(bbox[2])
+                shape.points[1].setX(bbox[0])
+                shape.points[2].setX(bbox[0])
+            if bbox[3] <= bbox[1]:
+                shape.points[0].setY(bbox[3])
+                shape.points[1].setY(bbox[3])
+                shape.points[2].setY(bbox[1])
+                shape.points[3].setY(bbox[1])
+            bbox = [shape.points[0].x(), shape.points[0].y(), shape.points[2].x(), shape.points[2].y()]
+            self.select_shapes([shape])
+        return bbox
+    
     def finalise(self):
         """Finish drawing for a shape"""
         assert self.current
@@ -1548,6 +1566,7 @@ class Canvas(
         if self.current.label is None:
             self.current.label = ""
         self.current.close()
+        self.fix_shape_bbox(self.current)
         self.shapes.append(self.current)
         self.store_shapes()
         self.current = None

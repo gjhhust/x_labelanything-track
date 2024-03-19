@@ -4593,3 +4593,27 @@ TypeError: match_track_shapes() got an unexpected keyword argument 'remove_all'
 
 
 
+An unhandled exception occurred:
+
+TypeError: store_shapes() takes 1 positional argument but 2 were given
+Traceback (most recent call last):
+  File "E:\UAVdataset\X-AnyLabeling\.\anylabeling\views\labeling\widgets\canvas.py", line 781, in mousePressEvent
+    self.finalise()
+  File "E:\UAVdataset\X-AnyLabeling\.\anylabeling\views\labeling\widgets\canvas.py", line 1570, in finalise
+    self.store_shapes(self.current)
+TypeError: store_shapes() takes 1 positional argument but 2 were given
+
+
+
+
+An unhandled exception occurred:
+
+KeyError: 'move_people_4'
+Traceback (most recent call last):
+  File "E:\UAVdataset\X-AnyLabeling\.\anylabeling\views\labeling\label_widget.py", line 2812, in new_shape
+    text = self.track_dicts[self.selected_track_id].label
+KeyError: 'move_people_4'
+
+
+
+
